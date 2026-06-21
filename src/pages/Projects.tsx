@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -61,6 +62,8 @@ const MOCK_PROJECTS = [
 ];
 
 const Projects = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-8 space-y-8 ml-64">
       <div className="flex justify-between items-end">
@@ -99,7 +102,11 @@ const Projects = () => {
           </TableHeader>
           <TableBody>
             {MOCK_PROJECTS.map((p) => (
-              <TableRow key={p.id} className="hover:bg-slate-50/50 cursor-pointer">
+              <TableRow 
+                key={p.id} 
+                className="hover:bg-slate-50/50 cursor-pointer transition-colors"
+                onClick={() => navigate(`/projects/${p.id}`)}
+              >
                 <TableCell>
                   <div>
                     <p className="font-semibold text-slate-900">{p.name}</p>
