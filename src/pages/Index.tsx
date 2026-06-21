@@ -7,7 +7,8 @@ import {
   Euro, 
   CheckCircle2,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  MessageSquare
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -17,9 +18,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line
+  ResponsiveContainer
 } from 'recharts';
 
 const data = [
@@ -60,7 +59,7 @@ const StatCard = ({ title, value, subValue, icon: Icon, trend, trendValue }: any
 
 const Dashboard = () => {
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 ml-64">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Dashboard Direzionale</h1>
         <p className="text-slate-500">Benvenuto in ImpresaOS. Ecco la panoramica della tua azienda.</p>
