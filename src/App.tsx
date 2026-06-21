@@ -9,6 +9,17 @@ import Index from "./pages/Index";
 import AiAssistant from "./pages/AiAssistant";
 import Inbox from "./pages/Inbox";
 import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
+import Invoices from "./pages/Invoices";
+import CashFlow from "./pages/CashFlow";
+import Reports from "./pages/Reports";
+import DeliveryNotes from "./pages/DeliveryNotes";
+import Quotes from "./pages/Quotes";
+import Procurement from "./pages/Procurement";
+import Safety from "./pages/Safety";
+import Documents from "./pages/Documents";
+import Admin from "./pages/Admin";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +40,17 @@ const App = () => (
                 <Route path="/ai-assistant" element={<AiAssistant />} />
                 <Route path="/inbox" element={<Inbox />} />
                 <Route path="/projects" element={<Projects />} />
-                {/* Altre rotte verranno aggiunte qui */}
+                <Route path="/projects/:id" element={<ProjectDetail />} />
+                <Route path="/invoices" element={<Invoices />} />
+                <Route path="/cash-flow" element={<CashFlow />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/delivery-notes" element={<DeliveryNotes />} />
+                <Route path="/quotes" element={<Quotes />} />
+                <Route path="/procurement" element={<Procurement />} />
+                <Route path="/safety" element={<Safety />} />
+                <Route path="/documents" element={<Documents />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
