@@ -3,6 +3,7 @@ import { ShieldCheck, AlertTriangle, FileText, Search, Plus, Calendar } from 'lu
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 const MOCK_SAFETY = [
   { id: '1', type: 'POS', title: 'Piano Operativo Sicurezza - Monza', expiry: '2024-12-31', status: 'valid' },

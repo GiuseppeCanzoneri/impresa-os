@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 const MOCK_REPORTS = [
   { id: '1', date: '2024-05-15', project: 'Cantiere Monza', workers: 5, hours: 40, status: 'verified', description: 'Gettata pilastri e posa ferro' },
