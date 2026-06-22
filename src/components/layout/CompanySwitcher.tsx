@@ -1,43 +1,42 @@
-import { Building2, Check, ChevronsUpDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import { Building2, ChevronsUpDown } from 'lucide-react';
 import { useCompany } from '@/hooks/useCompany';
 
 export default function CompanySwitcher() {
-  const { companies, activeCompany, activeCompanyId, setActiveCompanyId, loading } = useCompany();
+  const { companies, activeCompanyId, activeCompany, setActiveCompanyId, loading } = useCompany();
+
+  if (loading) {
+    return (
+      <div className="hidden h-10 items-center rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-500 sm:flex">
+        Caricamento...
+      </div>
+    );
+  }
+
+  if (companies.length <= 1) {
+    return (
+      <div className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 sm:flex">
+        <Building2 className="h-4 w-4 text-slate-500" />
+        <span className="max-w-[180px] truncate">{activeCompany?.name ?? 'Nessuna azienda'}</span>
+      </div>
+    );
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-10 max-w-[260px] justify-between gap-2 bg-white">
-          <span className="flex min-w-0 items-center gap-2">
-            <Building2 className="h-4 w-4 shrink-0 text-slate-500" />
-            <span className="truncate font-medium">{loading ? 'Caricamento...' : activeCompany?.name ?? 'Nessuna azienda'}</span>
-          </span>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 text-slate-400" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>Azienda attiva</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {companies.length === 0 ? (
-          <DropdownMenuItem disabled>Nessuna azienda disponibile</DropdownMenuItem>
-        ) : (
-          companies.map((company) => (
-            <DropdownMenuItem key={company.id} onClick={() => setActiveCompanyId(company.id)} className="flex items-center justify-between gap-3">
-              <span className="min-w-0">
-                <span className="block truncate font-medium">{company.name}</span>
-                <span className="text-xs text-slate-500">Piano {company.plan}</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <Badge variant={company.status === 'active' ? 'default' : 'secondary'}>{company.status}</Badge>
-                {company.id === activeCompanyId ? <Check className="h-4 w-4 text-blue-600" /> : null}
-              </span>
-            </DropdownMenuItem>
-          ))
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <label className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 sm:flex">
+      <Building2 className="h-4 w-4 text-slate-500" />
+      <select
+        className="max-w-[180px] bg-transparent outline-none"
+        value={activeCompanyId ?? ''}
+        onChange={(event) => setActiveCompanyId(event.target.value)}
+        aria-label="Seleziona azienda"
+      >
+        {companies.map((company) => (
+          <option key={company.id} value={company.id}>
+            {company.name}
+          </option>
+        ))}
+      </select>
+      <ChevronsUpDown className="h-4 w-4 text-slate-400" />
+    </label>
   );
 }

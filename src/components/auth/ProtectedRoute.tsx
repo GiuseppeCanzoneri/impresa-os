@@ -1,29 +1,23 @@
-import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import ConfigurationError from '@/components/system/ConfigurationError';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const location = useLocation();
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
-  // Sicurezza: niente bypass demo quando Supabase non è configurato.
-  // Se mancano le env, l'app si blocca invece di aprire le rotte private.
   if (!isSupabaseConfigured) {
     return <ConfigurationError />;
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-          <p className="text-sm text-slate-300">Verifica sessione...</p>
+      <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-white">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-xl">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm font-medium">Verifica sessione...</span>
         </div>
       </div>
     );

@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
+
 import Sidebar from '@/components/layout/Sidebar';
 import Topbar from '@/components/layout/Topbar';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import LoginPage from '@/components/auth/LoginPage';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { AuthProvider } from '@/hooks/useAuth';
 import { CompanyProvider } from '@/hooks/useCompany';
+
 import Index from '@/pages/Index';
 import AiAssistant from '@/pages/AiAssistant';
 import Inbox from '@/pages/Inbox';
@@ -34,11 +36,13 @@ function AppShell() {
 
   return (
     <CompanyProvider>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-dvh bg-slate-50 text-slate-950">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <div className="lg:pl-72">
+
+        <div className="min-h-dvh lg:pl-72">
           <Topbar onMenuClick={() => setSidebarOpen(true)} />
-          <main className="p-4 sm:p-6 lg:p-8">
+
+          <main className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/ai-assistant" element={<AiAssistant />} />
@@ -68,8 +72,8 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route
@@ -80,11 +84,12 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </BrowserRouter>
-          <Toaster />
-          <Sonner />
-        </AuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
+        <Toaster />
+        <Sonner />
       </TooltipProvider>
     </QueryClientProvider>
   );

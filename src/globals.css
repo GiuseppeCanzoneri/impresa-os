@@ -125,3 +125,35 @@
   background: rgb(51 65 85);
   border-radius: 999px;
 }
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(51 65 85);
+  border-radius: 999px;
+}
+
+/* Neutralizza vecchi layout con sidebar interna: ora la sidebar Ã¨ gestita solo da App.tsx */
+@media (max-width: 1023px) {
+  .ml-64,
+  .ml-72 {
+    margin-left: 0 !important;
+  }
+}

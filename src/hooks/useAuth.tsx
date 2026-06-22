@@ -6,8 +6,7 @@ interface AuthContextValue {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -26,16 +25,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data, error }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      if (error) console.error('Errore recupero sessione Supabase:', error.message);
       setSession(data.session ?? null);
       setUser(data.session?.user ?? null);
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
+      setSession(nextSession ?? null);
       setUser(nextSession?.user ?? null);
       setLoading(false);
     });
@@ -47,35 +45,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function signIn(email: string, password: string) {
-    if (!supabase) throw new Error('Supabase non configurato.');
+    if (!supabase) return { error: new Error('Supabase non configurato') };
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-  }
-
-  async function signUp(email: string, password: string, fullName?: string) {
-    if (!supabase) throw new Error('Supabase non configurato.');
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName ?? email.split('@')[0],
-        },
-      },
-    });
-    if (error) throw error;
+    return { error: error as Error | null };
   }
 
   async function signOut() {
     if (!supabase) return;
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    await supabase.auth.signOut();
   }
 
-  const value = useMemo(
-    () => ({ user, session, loading, signIn, signUp, signOut }),
-    [user, session, loading]
-  );
+  const value = useMemo(() => ({ user, session, loading, signIn, signOut }), [user, session, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

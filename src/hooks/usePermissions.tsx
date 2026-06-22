@@ -1,89 +1,54 @@
-import { useEffect, useMemo, useState } from 'react';
-import { requireSupabase, isSupabaseConfigured } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useMemo } from 'react';
 import { useCompany } from '@/hooks/useCompany';
 
-type PermissionState = {
-  loading: boolean;
-  role: string | null;
-  isSystemAdmin: boolean;
-  canViewAdmin: boolean;
-  canManageUsers: boolean;
-  canManageCompany: boolean;
-  canManageSettings: boolean;
-  canViewFinancials: boolean;
-};
+type AppRole =
+  | 'super_admin'
+  | 'company_admin'
+  | 'direzione'
+  | 'amministrazione'
+  | 'manager'
+  | 'tecnico'
+  | 'capocantiere'
+  | 'operaio'
+  | 'consulente'
+  | string;
 
-const INITIAL_STATE: PermissionState = {
-  loading: true,
-  role: null,
-  isSystemAdmin: false,
-  canViewAdmin: false,
-  canManageUsers: false,
-  canManageCompany: false,
-  canManageSettings: false,
-  canViewFinancials: false,
-};
+const adminRoles = new Set<AppRole>(['super_admin', 'company_admin']);
+const financeRoles = new Set<AppRole>(['super_admin', 'company_admin', 'direzione', 'amministrazione']);
+const managementRoles = new Set<AppRole>(['super_admin', 'company_admin', 'direzione', 'manager']);
 
-export function usePermissions(): PermissionState {
-  const { user } = useAuth();
-  const { activeCompanyId } = useCompany();
-  const [state, setState] = useState<PermissionState>(INITIAL_STATE);
+function humanRole(role?: string | null) {
+  if (!role) return 'Utente';
+  const labels: Record<string, string> = {
+    super_admin: 'Super Admin',
+    company_admin: 'Admin azienda',
+    direzione: 'Direzione',
+    amministrazione: 'Amministrazione',
+    manager: 'Manager',
+    tecnico: 'Tecnico',
+    capocantiere: 'Capocantiere',
+    operaio: 'Operaio',
+    consulente: 'Consulente',
+  };
+  return labels[role] ?? role;
+}
 
-  useEffect(() => {
-    let cancelled = false;
+export function usePermissions() {
+  const { memberships, activeCompanyId } = useCompany();
 
-    async function loadPermissions() {
-      if (!isSupabaseConfigured || !user) {
-        if (!cancelled) setState({ ...INITIAL_STATE, loading: false });
-        return;
-      }
+  return useMemo(() => {
+    const activeMembership = memberships.find((membership) => membership.company_id === activeCompanyId);
+    const role = (activeMembership?.role ?? 'company_admin') as AppRole;
 
-      try {
-        const supabase = requireSupabase();
-
-        const { data: isSystemAdminData, error: adminError } = await supabase.rpc('current_user_is_system_admin');
-        if (adminError) throw adminError;
-
-        let role: string | null = null;
-        if (activeCompanyId) {
-          const { data: roleData, error: roleError } = await supabase.rpc('get_my_company_role', {
-            p_company_id: activeCompanyId,
-          });
-          if (roleError) throw roleError;
-          role = roleData ?? null;
-        }
-
-        const isSystemAdmin = Boolean(isSystemAdminData);
-        const effectiveRole = isSystemAdmin ? 'super_admin' : role;
-        const canManageCompany = isSystemAdmin || effectiveRole === 'company_admin';
-        const canViewAdmin = canManageCompany;
-        const canViewFinancials = isSystemAdmin || ['company_admin', 'direzione', 'amministrazione'].includes(effectiveRole ?? '');
-
-        if (!cancelled) {
-          setState({
-            loading: false,
-            role: effectiveRole,
-            isSystemAdmin,
-            canViewAdmin,
-            canManageUsers: canManageCompany,
-            canManageCompany,
-            canManageSettings: canManageCompany,
-            canViewFinancials,
-          });
-        }
-      } catch (error) {
-        console.error('Errore caricamento permessi:', error);
-        if (!cancelled) setState({ ...INITIAL_STATE, loading: false });
-      }
-    }
-
-    loadPermissions();
-
-    return () => {
-      cancelled = true;
+    return {
+      role,
+      roleLabel: humanRole(role),
+      canAccessAdmin: adminRoles.has(role),
+      canManageCompany: adminRoles.has(role),
+      canSeeFinance: financeRoles.has(role),
+      canManageProjects: managementRoles.has(role) || role === 'tecnico',
+      canUseInbox: role !== 'consulente',
+      canUseReports: role !== 'consulente',
     };
-  }, [user, activeCompanyId]);
-
-  return useMemo(() => state, [state]);
+  }, [memberships, activeCompanyId]);
 }
