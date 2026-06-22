@@ -1,49 +1,49 @@
-import React from 'react';
-import { Bell, Building2, Menu, Search, Sparkles } from 'lucide-react';
+import { Menu, Bell, LogOut, Search, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import CompanySwitcher from '@/components/layout/CompanySwitcher';
+import { useAuth } from '@/hooks/useAuth';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 interface TopbarProps {
   onMenuClick?: () => void;
 }
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
+  const { user, signOut } = useAuth();
+
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-white/95 px-4 backdrop-blur lg:ml-64 lg:px-8">
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
-          <Menu size={21} />
+          <Menu className="h-5 w-5" />
         </Button>
 
-        <div className="relative hidden w-full max-w-xl md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <Input
-            placeholder="Cerca commesse, fatture, documenti, messaggi..."
-            className="border-slate-200 bg-slate-50 pl-10 focus-visible:ring-blue-500"
-          />
+        <div className="hidden flex-1 items-center md:flex">
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input className="pl-9" placeholder="Cerca commesse, fatture, DDT, messaggi..." />
+          </div>
         </div>
 
-        <div className="md:hidden">
-          <p className="text-sm font-semibold text-slate-900">ImpresaOS</p>
-          <p className="text-xs text-slate-500">Erelma S.r.l.</p>
+        <div className="ml-auto flex items-center gap-2">
+          {!isSupabaseConfigured && (
+            <Badge variant="outline" className="hidden border-amber-300 bg-amber-50 text-amber-700 sm:inline-flex">
+              <ShieldAlert className="mr-1 h-3.5 w-3.5" /> Demo senza Supabase
+            </Badge>
+          )}
+          <CompanySwitcher />
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+          </Button>
+          {isSupabaseConfigured && user && (
+            <Button variant="ghost" size="icon" onClick={() => signOut()} title="Esci">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          )}
         </div>
-      </div>
-
-      <div className="flex items-center gap-2 lg:gap-4">
-        <div className="hidden items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 lg:flex">
-          <Sparkles size={16} />
-          <span>AI mock attiva</span>
-        </div>
-
-        <div className="hidden items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 sm:flex">
-          <Building2 size={16} className="text-blue-600" />
-          <span>Erelma S.r.l.</span>
-        </div>
-
-        <Button variant="outline" size="icon" className="relative">
-          <Bell size={18} />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
-        </Button>
       </div>
     </header>
   );

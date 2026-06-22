@@ -1,6 +1,3 @@
-export type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
-export interface JsonObject { [key: string]: JsonValue; }
-
 export type UserRole =
   | 'super_admin'
   | 'company_admin'
@@ -11,18 +8,27 @@ export type UserRole =
   | 'operaio'
   | 'consulente';
 
-export type SubscriptionPlan = 'free' | 'base' | 'professional' | 'enterprise';
-export type CompanyStatus = 'active' | 'suspended' | 'trial' | 'cancelled';
+export type CompanyPlan = 'free' | 'base' | 'professional' | 'enterprise';
+export type CompanyStatus = 'active' | 'trial' | 'suspended' | 'archived';
+
+export interface CompanySettings {
+  modules?: string[];
+  timezone?: string;
+  currency?: string;
+  ai_enabled?: boolean;
+  whatsapp_enabled?: boolean;
+  [key: string]: unknown;
+}
 
 export interface Company {
   id: string;
   name: string;
-  vat_number?: string;
-  fiscal_code?: string;
-  logo_url?: string;
-  plan: SubscriptionPlan;
+  vat_number?: string | null;
+  fiscal_code?: string | null;
+  logo_url?: string | null;
+  plan: CompanyPlan;
   status: CompanyStatus;
-  settings: JsonObject;
+  settings: CompanySettings;
   created_at: string;
   updated_at: string;
 }
@@ -31,12 +37,11 @@ export interface Profile {
   id: string;
   email: string;
   full_name: string;
-  avatar_url?: string;
-  phone?: string;
-  role?: UserRole;
-  company_id?: string;
-  created_at?: string;
-  updated_at?: string;
+  avatar_url?: string | null;
+  phone?: string | null;
+  default_company_id?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CompanyMember {
@@ -46,63 +51,26 @@ export interface CompanyMember {
   role: UserRole;
   is_active: boolean;
   created_at: string;
-  updated_at: string;
+  company?: Company;
+  profile?: Profile;
 }
-
-export type ModuleKey =
-  | 'dashboard'
-  | 'ai_assistant'
-  | 'inbox'
-  | 'projects'
-  | 'invoices'
-  | 'cashflow'
-  | 'daily_reports'
-  | 'delivery_notes'
-  | 'quotes'
-  | 'procurement'
-  | 'safety'
-  | 'documents'
-  | 'admin'
-  | 'settings';
-
-export interface Module {
-  id: string;
-  key: ModuleKey;
-  name: string;
-  description?: string;
-  is_active: boolean;
-}
-
-export interface Subscription {
-  id: string;
-  company_id: string;
-  plan: SubscriptionPlan;
-  status: CompanyStatus;
-  starts_at: string;
-  ends_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'planned' | 'cancelled';
 
 export interface Project {
   id: string;
   company_id: string;
-  code?: string;
+  code?: string | null;
   name: string;
   client_name: string;
-  location?: string;
-  status: ProjectStatus;
+  location?: string | null;
+  status: 'planned' | 'active' | 'on_hold' | 'completed' | 'archived';
   contract_amount: number;
-  budget?: number;
   costs_to_date: number;
   revenues_to_date: number;
   margin_estimated: number;
   progress: number;
-  manager_id?: string;
-  start_date?: string;
-  end_date?: string;
+  manager_id?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
   alerts_count: number;
   created_at: string;
   updated_at: string;
@@ -112,122 +80,113 @@ export interface ProjectCost {
   id: string;
   company_id: string;
   project_id: string;
-  category: 'labor' | 'materials' | 'equipment' | 'supplier' | 'subcontractor' | 'general' | 'other';
-  amount: number;
+  category: 'materials' | 'labor' | 'equipment' | 'subcontractors' | 'services' | 'other';
   description: string;
-  source_type?: 'invoice' | 'daily_report' | 'delivery_note' | 'manual';
-  source_id?: string;
-  cost_date: string;
-  created_at: string;
+  amount: number;
+  source_type?: 'invoice' | 'daily_report' | 'delivery_note' | 'manual' | null;
+  source_id?: string | null;
+  date: string;
 }
 
 export interface ProjectRevenue {
   id: string;
   company_id: string;
   project_id: string;
-  amount: number;
   description: string;
-  source_type?: 'invoice' | 'sal' | 'manual';
-  source_id?: string;
-  revenue_date: string;
-  created_at: string;
+  amount: number;
+  source_type?: 'invoice' | 'sal' | 'manual' | null;
+  source_id?: string | null;
+  date: string;
 }
-
-export type InvoiceType = 'active' | 'passive';
-export type InvoiceStatus =
-  | 'draft'
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'to_pay'
-  | 'paid'
-  | 'overdue'
-  | 'cancelled';
 
 export interface Invoice {
   id: string;
   company_id: string;
-  project_id?: string;
-  type: InvoiceType;
+  project_id?: string | null;
+  type: 'active' | 'passive';
   number: string;
   entity_name: string;
   amount: number;
-  issue_date?: string;
+  issue_date?: string | null;
   due_date: string;
-  status: InvoiceStatus;
-  approver_id?: string;
-  file_url?: string;
-  notes?: string;
+  status: 'draft' | 'pending' | 'assigned' | 'approved' | 'rejected' | 'to_pay' | 'paid';
+  approver_id?: string | null;
+  notes?: string | null;
+  file_url?: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export type CashflowType = 'income' | 'expense';
-export type CashflowStatus = 'planned' | 'confirmed' | 'paid' | 'overdue' | 'cancelled';
-
 export interface CashflowMovement {
   id: string;
   company_id: string;
-  project_id?: string;
-  invoice_id?: string;
-  type: CashflowType;
+  project_id?: string | null;
+  invoice_id?: string | null;
+  type: 'income' | 'expense';
   amount: number;
   expected_date: string;
-  actual_date?: string;
-  status: CashflowStatus;
+  actual_date?: string | null;
+  status: 'planned' | 'confirmed' | 'paid' | 'overdue';
   description: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
-export interface AttachmentFile {
+export interface DocumentFile {
   id: string;
+  company_id?: string | null;
+  project_id?: string | null;
   name: string;
-  mime_type: string;
-  size_bytes?: number;
-  url?: string;
+  path?: string | null;
+  url?: string | null;
+  mime_type?: string | null;
+  size_bytes?: number | null;
+  category?: string | null;
+  created_at?: string | null;
 }
 
-export type IncomingChannel = 'whatsapp_mock' | 'whatsapp' | 'telegram' | 'email' | 'manual';
-export type IncomingCategory =
+export type IncomingMessageCategory =
   | 'daily_report'
   | 'delivery_note'
-  | 'photo'
-  | 'note'
+  | 'site_photo'
   | 'hours'
-  | 'invoice'
+  | 'material'
   | 'safety'
-  | 'purchase_request'
+  | 'invoice_approval'
+  | 'note'
   | 'unknown';
-export type IncomingStatus =
+
+export type IncomingMessageStatus =
   | 'received'
   | 'to_classify'
   | 'classified'
-  | 'converted_to_report'
-  | 'linked_to_project'
+  | 'converted'
   | 'archived'
   | 'error';
 
 export interface IncomingMessage {
   id: string;
   company_id: string;
-  channel: IncomingChannel;
+  channel: 'whatsapp_mock' | 'whatsapp_cloud_api' | 'telegram' | 'internal_chat';
   sender_name: string;
-  sender_phone?: string;
-  sender_email?: string;
+  sender_phone?: string | null;
   text: string;
   timestamp: string;
-  attachments?: AttachmentFile[];
-  suggested_project_id?: string;
-  suggested_project_name?: string;
-  category: IncomingCategory;
-  confidence?: number;
-  status: IncomingStatus;
-  created_at?: string;
-  updated_at?: string;
+  attachments?: DocumentFile[] | null;
+  suggested_project_id?: string | null;
+  suggested_project_name?: string | null;
+  category?: IncomingMessageCategory | null;
+  confidence?: number | null;
+  status: IncomingMessageStatus;
 }
 
-export type DailyReportStatus = 'draft' | 'submitted' | 'verified' | 'rejected';
+export interface WhatsAppThread {
+  id: string;
+  company_id: string;
+  sender_name: string;
+  sender_phone: string;
+  project_id?: string | null;
+  last_message_at: string;
+  status: 'open' | 'closed';
+}
 
 export interface DailyReport {
   id: string;
@@ -237,111 +196,75 @@ export interface DailyReport {
   workers_count: number;
   hours_total: number;
   description: string;
-  materials?: string[];
-  photos?: AttachmentFile[];
-  status: DailyReportStatus;
-  created_by?: string;
-  verified_by?: string;
+  materials?: string[] | null;
+  equipment?: string[] | null;
+  photos?: DocumentFile[] | null;
+  source_message_id?: string | null;
+  status: 'draft' | 'to_verify' | 'verified' | 'rejected';
   created_at: string;
-  updated_at: string;
 }
 
 export interface DeliveryNote {
   id: string;
   company_id: string;
-  project_id?: string;
-  supplier_id?: string;
+  project_id?: string | null;
+  supplier_id?: string | null;
   number: string;
   date: string;
   items: string[];
-  file_url?: string;
-  invoice_id?: string;
-  status?: 'to_match' | 'matched' | 'archived';
-  created_at?: string;
-  updated_at?: string;
+  file_url?: string | null;
+  invoice_id?: string | null;
+  status: 'received' | 'matched' | 'to_match' | 'archived';
 }
 
 export interface Supplier {
   id: string;
   company_id: string;
   name: string;
-  vat_number?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  created_at: string;
-  updated_at: string;
+  vat_number?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  category?: string | null;
+  rating?: number | null;
 }
-
-export type PurchaseOrderStatus = 'draft' | 'sent' | 'confirmed' | 'partially_received' | 'received' | 'cancelled';
 
 export interface PurchaseOrder {
   id: string;
   company_id: string;
-  project_id?: string;
-  supplier_id?: string;
+  project_id?: string | null;
+  supplier_id?: string | null;
   number: string;
-  amount?: number;
-  status: PurchaseOrderStatus;
-  order_date: string;
-  expected_delivery_date?: string;
-  notes?: string;
+  amount: number;
+  status: 'draft' | 'sent' | 'confirmed' | 'delivered' | 'cancelled';
   created_at: string;
-  updated_at: string;
 }
-
-export type SafetyDocumentType = 'POS' | 'PSC' | 'DURC' | 'attestato' | 'visita_medica' | 'DPI' | 'polizza' | 'altro';
-export type SafetyDocumentStatus = 'valid' | 'expiring' | 'expired' | 'missing' | 'to_verify';
 
 export interface SafetyDocument {
   id: string;
   company_id: string;
-  type: SafetyDocumentType;
+  type: 'POS' | 'PSC' | 'DURC' | 'attestato' | 'visita_medica' | 'DPI' | 'polizza' | 'altro';
   title: string;
-  expiry_date?: string;
-  project_id?: string;
-  worker_id?: string;
-  supplier_id?: string;
-  file_url?: string;
-  status: SafetyDocumentStatus;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface DocumentFile {
-  id: string;
-  company_id: string;
-  project_id?: string;
-  invoice_id?: string;
-  supplier_id?: string;
-  employee_id?: string;
-  vehicle_id?: string;
-  safety_document_id?: string;
-  name: string;
-  category: string;
-  mime_type: string;
-  size_bytes?: number;
-  file_url: string;
-  expiry_date?: string;
-  created_at: string;
-  updated_at: string;
+  expiry_date?: string | null;
+  project_id?: string | null;
+  worker_id?: string | null;
+  status: 'valid' | 'expiring' | 'expired' | 'missing';
+  file_url?: string | null;
 }
 
 export interface AiConversation {
   id: string;
   company_id: string;
-  profile_id?: string;
-  title?: string;
+  title: string;
+  created_by: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface AiMessage {
   id: string;
-  conversation_id?: string;
-  company_id?: string;
+  conversation_id?: string | null;
+  company_id?: string | null;
   role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: string;
-  metadata?: JsonObject;
+  created_at: string;
+  metadata?: Record<string, unknown> | null;
 }

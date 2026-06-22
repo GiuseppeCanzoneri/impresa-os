@@ -2,25 +2,27 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import {
+  Briefcase,
+  ClipboardList,
+  FileStack,
+  HardHat,
+  Inbox,
   LayoutDashboard,
   MessageSquare,
-  Inbox,
-  HardHat,
   Receipt,
-  TrendingUp,
-  ClipboardList,
-  Truck,
-  ShieldCheck,
-  Users,
   Settings,
-  Briefcase,
-  FileStack,
+  ShieldCheck,
   ShoppingCart,
+  TrendingUp,
+  Truck,
+  Users,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { useCompany } from '@/hooks/useCompany';
 
 interface MenuItem {
   icon: LucideIcon;
@@ -52,28 +54,26 @@ interface SidebarProps {
 }
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
+  const { activeCompany } = useCompany();
+
   return (
     <div className="flex h-full flex-col bg-slate-950 text-white">
-      <div className="flex items-start justify-between border-b border-slate-800 p-5">
+      <div className="flex h-16 items-center justify-between border-b border-slate-800 px-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-blue-400">ImpresaOS</h1>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-            AI Construction OS
-          </p>
+          <h1 className="text-xl font-bold tracking-tight">ImpresaOS</h1>
+          <p className="text-xs text-slate-400">AI Construction OS</p>
         </div>
         {onClose && (
-          <Button variant="ghost" size="icon" className="text-slate-300 lg:hidden" onClick={onClose}>
-            <X size={18} />
+          <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-slate-800 hover:text-white lg:hidden" onClick={onClose}>
+            <X className="h-5 w-5" />
           </Button>
         )}
       </div>
 
-      <div className="border-b border-slate-800 p-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-          <p className="text-xs uppercase tracking-wider text-slate-400">Azienda attiva</p>
-          <p className="mt-1 truncate text-sm font-semibold text-white">Erelma S.r.l.</p>
-          <p className="mt-1 text-xs text-slate-400">Piano Enterprise · ambiente demo</p>
-        </div>
+      <div className="border-b border-slate-800 px-5 py-4">
+        <p className="text-xs uppercase tracking-wide text-slate-500">Azienda attiva</p>
+        <p className="mt-1 truncate text-sm font-semibold">{activeCompany?.name ?? 'Nessuna azienda'}</p>
+        <p className="text-xs text-slate-400">Piano {activeCompany?.plan ?? 'demo'}</p>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -81,23 +81,20 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === '/'}
             onClick={onClose}
             className={({ isActive }) =>
               cn(
                 'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-950/30'
-                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                isActive ? 'bg-blue-600 text-white shadow-sm shadow-blue-950/30' : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               )
             }
           >
-            <item.icon size={18} />
-            <span className="flex-1 truncate">{item.label}</span>
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span className="truncate">{item.label}</span>
             {item.badge && (
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-white">
+              <Badge className="ml-auto bg-white/10 text-white hover:bg-white/10" variant="secondary">
                 {item.badge}
-              </span>
+              </Badge>
             )}
           </NavLink>
         ))}
@@ -105,12 +102,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       <div className="border-t border-slate-800 p-4">
         <div className="flex items-center gap-3 rounded-xl bg-slate-900 p-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-xs font-bold">
-            GC
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">Giuseppe Canzoneri</p>
-            <p className="truncate text-xs text-slate-400">Super Admin</p>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold">GC</div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">Giuseppe Canzoneri</p>
+            <p className="text-xs text-slate-400">Super Admin</p>
           </div>
         </div>
       </div>
@@ -121,12 +116,11 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   return (
     <>
-      <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 lg:block">
         <SidebarContent />
       </aside>
-
       <Sheet open={isOpen} onOpenChange={(open) => !open && onClose?.()}>
-        <SheetContent side="left" className="w-72 border-0 bg-slate-950 p-0 text-white">
+        <SheetContent side="left" className="w-72 border-0 p-0">
           <SidebarContent onClose={onClose} />
         </SheetContent>
       </Sheet>
