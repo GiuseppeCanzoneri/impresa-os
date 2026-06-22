@@ -99,3 +99,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Appendere in fondo a src/globals.css.
+   Serve a non rompere il layout mobile delle pagine Dyad che hanno ancora classi ml-64 interne. */
+
+@media (max-width: 1023px) {
+  .ml-64 {
+    margin-left: 0 !important;
+  }
+
+  .h-screen {
+    min-height: 100dvh;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(51 65 85);
+  border-radius: 999px;
+}
