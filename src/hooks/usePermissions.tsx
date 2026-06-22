@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useCompany } from '@/hooks/useCompany';
 
-type AppRole =
+export type AppRole =
   | 'super_admin'
   | 'company_admin'
   | 'direzione'
@@ -19,6 +19,7 @@ const managementRoles = new Set(['super_admin', 'company_admin', 'direzione', 'm
 
 function humanRole(role?: string | null) {
   if (!role) return 'Utente';
+
   const labels: Record<string, string> = {
     super_admin: 'Super Admin',
     company_admin: 'Admin azienda',
@@ -30,19 +31,23 @@ function humanRole(role?: string | null) {
     operaio: 'Operaio',
     consulente: 'Consulente',
   };
+
   return labels[role] ?? role;
 }
 
 export function usePermissions() {
-  const { activeRole, isSystemAdmin } = useCompany();
+  const { memberships, activeCompanyId } = useCompany();
 
   return useMemo(() => {
-    const role = (isSystemAdmin ? 'super_admin' : activeRole ?? 'utente') as AppRole;
+    const activeMembership = memberships.find((membership) => membership.company_id === activeCompanyId);
+
+    // Fallback prudente: se il ruolo non è disponibile, l'interfaccia assume il privilegio minimo.
+    // La sicurezza reale resta comunque nelle RLS di Supabase.
+    const role = (activeMembership?.role ?? 'consulente') as AppRole;
 
     return {
       role,
       roleLabel: humanRole(role),
-      isSystemAdmin,
       canAccessAdmin: adminRoles.has(role),
       canManageCompany: adminRoles.has(role),
       canSeeFinance: financeRoles.has(role),
@@ -50,5 +55,5 @@ export function usePermissions() {
       canUseInbox: role !== 'consulente',
       canUseReports: role !== 'consulente',
     };
-  }, [activeRole, isSystemAdmin]);
+  }, [memberships, activeCompanyId]);
 }

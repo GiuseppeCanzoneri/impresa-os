@@ -54,26 +54,34 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-function initials(nameOrEmail: string) {
-  const parts = nameOrEmail.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  return nameOrEmail.slice(0, 2).toUpperCase();
+function getDisplayName(user: ReturnType<typeof useAuth>['user']) {
+  const metadata = user?.user_metadata as Record<string, unknown> | undefined;
+  const fullName = metadata?.full_name;
+  if (typeof fullName === 'string' && fullName.trim()) return fullName.trim();
+  return user?.email?.split('@')[0] ?? 'Utente';
+}
+
+function getInitials(name: string) {
+  return name
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || 'U';
 }
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { roleLabel, canAccessAdmin } = usePermissions();
-  const { activeCompany, profile } = useCompany();
+  const { activeCompany } = useCompany();
   const { user } = useAuth();
-
   const visibleItems = menuItems.filter((item) => !item.adminOnly || canAccessAdmin);
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email || 'Utente';
-  const displayInitials = initials(displayName);
+  const displayName = getDisplayName(user);
 
   return (
-    <aside className="flex h-full flex-col bg-slate-950 text-white">
+    <aside className="flex h-full w-full flex-col bg-slate-950 text-white">
       <div className="flex items-start justify-between border-b border-white/10 px-5 py-5">
         <div>
-          <div className="text-xl font-bold leading-tight">ImpresaOS</div>
+          <div className="text-xl font-bold tracking-tight">ImpresaOS</div>
           <div className="text-sm text-slate-400">AI Construction OS</div>
         </div>
         {onClose ? (
@@ -83,47 +91,49 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         ) : null}
       </div>
 
-      <div className="border-b border-white/10 px-5 py-5">
+      <div className="border-b border-white/10 px-4 py-5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Azienda attiva</div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="font-semibold">{activeCompany?.name ?? 'Nessuna azienda'}</div>
-          <div className="mt-1 text-sm text-slate-400">
-            {activeCompany ? `Piano ${activeCompany.plan ?? '—'} · ambiente protetto` : 'Seleziona o crea una azienda'}
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+          <div className="truncate text-sm font-semibold text-white">{activeCompany?.name ?? 'Nessuna azienda'}</div>
+          <div className="mt-1 truncate text-xs text-slate-400">
+            {activeCompany ? `Piano ${activeCompany.plan} · ${activeCompany.status}` : 'Seleziona o crea una azienda'}
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
-        {visibleItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
-            onClick={onClose}
-            className={({ isActive }) =>
-              cn(
-                'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-blue-600 text-white shadow-sm shadow-blue-950/30' : 'text-slate-300 hover:bg-white/10 hover:text-white'
-              )
-            }
-          >
-            <item.icon className="h-5 w-5 shrink-0" />
-            <span className="flex-1">{item.label}</span>
-            {item.badge ? (
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-slate-200">{item.badge}</span>
-            ) : null}
-          </NavLink>
-        ))}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="space-y-1">
+          {visibleItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              onClick={onClose}
+              className={({ isActive }) =>
+                cn(
+                  'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive ? 'bg-blue-600 text-white shadow-sm shadow-blue-950/30' : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                )
+              }
+            >
+              <item.icon className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {item.badge ? (
+                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-white">{item.badge}</span>
+              ) : null}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
       <div className="border-t border-white/10 p-4">
-        <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-            {displayInitials}
+        <div className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+            {getInitials(displayName)}
           </div>
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-white">{displayName}</div>
-            <div className="text-xs text-slate-400">{roleLabel}</div>
+            <div className="truncate text-xs text-slate-400">{roleLabel}</div>
           </div>
         </div>
       </div>
@@ -139,7 +149,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       </div>
 
       <Sheet open={isOpen} onOpenChange={(open) => !open && onClose?.()}>
-        <SheetContent side="left" className="w-72 border-r-0 bg-slate-950 p-0">
+        <SheetContent side="left" className="w-80 border-none bg-slate-950 p-0 text-white">
           <SidebarContent onClose={onClose} />
         </SheetContent>
       </Sheet>
