@@ -1,30 +1,37 @@
-import type { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { isSupabaseConfigured } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import ConfigurationError from '@/components/system/ConfigurationError';
 
-export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { session, loading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
 
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const location = useLocation();
+  const { user, loading } = useAuth();
+
+  // Sicurezza: niente bypass demo quando Supabase non è configurato.
+  // Se mancano le env, l'app si blocca invece di aprire le rotte private.
   if (!isSupabaseConfigured) {
-    return children;
+    return <ConfigurationError />;
   }
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="flex items-center gap-3 rounded-xl border bg-white px-5 py-4 shadow-sm">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-          <span className="text-sm font-medium text-slate-700">Caricamento sessione...</span>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          <p className="text-sm text-slate-300">Verifica sessione...</p>
         </div>
       </div>
     );
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  return children;
+  return <>{children}</>;
 }
