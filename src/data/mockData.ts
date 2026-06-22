@@ -90,7 +90,7 @@ export const mockIncomingMessages: IncomingMessage[] = [
     channel: 'whatsapp_mock',
     sender_name: 'Luca Bianchi - Capocantiere',
     sender_phone: '+39 333 1234567',
-    text: 'Cantiere Monza: oggi 4 operai, 8 ore ciascuno. Arrivato DDT calcestruzzo, allego foto. Completata demolizione piano terra.',
+    text: 'Cantiere Monza: oggi 4 operai, 8 ore ciascuno.\nArrivato DDT calcestruzzo, allego foto.\nCompletata demolizione piano terra.',
     timestamp: '2026-06-22T09:15:00Z',
     attachments: [
       { id: 'file-1', name: 'foto_cantiere_monza.jpg', mime_type: 'image/jpeg' },
@@ -108,7 +108,7 @@ export const mockIncomingMessages: IncomingMessage[] = [
     channel: 'whatsapp_mock',
     sender_name: 'Marco Rossi - Operaio',
     sender_phone: '+39 333 7654321',
-    text: 'Ceprano: finite le prove impianto. Io 8 ore, Giuseppe 8 ore. Da verificare quadro elettrico locale tecnico.',
+    text: 'Ceprano: finite le prove impianto.\nIo 8 ore, Giuseppe 8 ore.\nDa verificare quadro elettrico locale tecnico.',
     timestamp: '2026-06-22T17:30:00Z',
     suggested_project_id: 'prj-ceprano',
     suggested_project_name: 'Palasport Città di Ceprano',
@@ -191,7 +191,10 @@ export const mockCashflow: CashflowMovement[] = [
 ];
 
 export function formatEuro(value: number): string {
-  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(value);
 }
 
 export function getProjectMargin(project: Project): number {
