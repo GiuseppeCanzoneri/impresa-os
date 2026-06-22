@@ -1,186 +1,140 @@
-import { Navigate } from 'react-router-dom';
-import { Building2, CheckCircle2, Lock, Shield, Users } from 'lucide-react';
+import React from 'react';
+import { Users, Building2, Shield, MoreVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCompany } from '@/hooks/useCompany';
-import { usePermissions } from '@/hooks/usePermissions';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-function planLabel(plan?: string | null) {
-  const labels: Record<string, string> = {
-    free: 'Free',
-    base: 'Base',
-    professional: 'Professional',
-    enterprise: 'Enterprise',
-  };
-  return plan ? labels[plan] ?? plan : '-';
-}
+const MOCK_COMPANIES = [
+  { id: '1', name: 'Edilizia S.p.A.', vat: 'IT01234567890', plan: 'Enterprise', status: 'active', users: 24 },
+  { id: '2', name: 'Restauri Rossi Srl', vat: 'IT09876543210', plan: 'Professional', status: 'active', users: 8 },
+  { id: '3', name: 'Impianti Verdi Snc', vat: 'IT11223344556', plan: 'Basic', status: 'suspended', users: 3 },
+];
 
-function statusLabel(status?: string | null) {
-  const labels: Record<string, string> = {
-    active: 'Attiva',
-    trial: 'Trial',
-    suspended: 'Sospesa',
-    archived: 'Archiviata',
-  };
-  return status ? labels[status] ?? status : '-';
-}
+const MOCK_ROLES = [
+  { id: '1', name: 'Super Admin', description: 'Accesso totale a tutte le aziende e impostazioni di sistema.', users: 2 },
+  { id: '2', name: 'Company Admin', description: 'Gestione completa della propria azienda e utenti.', users: 12 },
+  { id: '3', name: 'Direzione', description: 'Accesso a dashboard finanziarie e reportistica avanzata.', users: 5 },
+  { id: '4', name: 'Tecnico', description: 'Gestione cantieri, rapportini e documenti tecnici.', users: 45 },
+];
 
-function roleLabel(role?: string | null) {
-  const labels: Record<string, string> = {
-    super_admin: 'Super Admin',
-    company_admin: 'Admin azienda',
-    direzione: 'Direzione',
-    amministrazione: 'Amministrazione',
-    manager: 'Manager',
-    tecnico: 'Tecnico',
-    capocantiere: 'Capocantiere',
-    operaio: 'Operaio',
-    consulente: 'Consulente',
-  };
-  return role ? labels[role] ?? role : '-';
-}
-
-export default function Admin() {
-  const { canAccessAdmin, roleLabel: currentRoleLabel } = usePermissions();
-  const { companies, memberships, activeCompany } = useCompany();
-
-  if (!canAccessAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  const activeMemberships = memberships.filter((membership) => membership.is_active);
-
+const Admin = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
-          <Shield className="h-4 w-4" />
-          Area riservata · {currentRoleLabel}
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-950">Aziende & Utenti</h1>
-        <p className="max-w-3xl text-slate-600">
-          Gestione multi-azienda, ruoli e moduli attivi. I dati visualizzati sono filtrati tramite Supabase e RLS.
-        </p>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Amministrazione Sistema</h1>
+        <p className="text-slate-500">Gestisci aziende, utenti e permessi multi-tenant.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-slate-600">
-              <Building2 className="h-4 w-4" /> Aziende accessibili
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold">{companies.length}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-slate-600">
-              <Users className="h-4 w-4" /> Membership attive
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-3xl font-bold">{activeMemberships.length}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-slate-600">
-              <CheckCircle2 className="h-4 w-4" /> Azienda attiva
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="truncate text-lg font-semibold">{activeCompany?.name ?? 'Nessuna'}</CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="aziende">
+        <TabsList className="bg-white border">
+          <TabsTrigger value="aziende" className="gap-2"><Building2 size={16} /> Aziende</TabsTrigger>
+          <TabsTrigger value="utenti" className="gap-2"><Users size={16} /> Utenti</TabsTrigger>
+          <TabsTrigger value="ruoli" className="gap-2"><Shield size={16} /> Ruoli & Permessi</TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Aziende</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Azienda</TableHead>
-                <TableHead>Piano</TableHead>
-                <TableHead>Stato</TableHead>
-                <TableHead>P. IVA / CF</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {companies.length === 0 ? (
+        <TabsContent value="aziende" className="mt-6">
+          <div className="bg-white rounded-xl border overflow-hidden">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500">
-                    Nessuna azienda disponibile.
-                  </TableCell>
+                  <TableHead>Azienda</TableHead>
+                  <TableHead>P. IVA</TableHead>
+                  <TableHead>Piano</TableHead>
+                  <TableHead>Utenti</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
-              ) : (
-                companies.map((company) => (
-                  <TableRow key={company.id}>
-                    <TableCell className="font-medium">{company.name}</TableCell>
-                    <TableCell>{planLabel(company.plan)}</TableCell>
+              </TableHeader>
+              <TableBody>
+                {MOCK_COMPANIES.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell className="text-slate-500 font-mono text-xs">{c.vat}</TableCell>
+                    <TableCell><Badge variant="outline">{c.plan}</Badge></TableCell>
+                    <TableCell>{c.users}</TableCell>
                     <TableCell>
-                      <Badge variant={company.status === 'active' ? 'default' : 'secondary'}>{statusLabel(company.status)}</Badge>
+                      <Badge className={c.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}>
+                        {c.status === 'active' ? 'Attiva' : 'Sospesa'}
+                      </Badge>
                     </TableCell>
-                    <TableCell>{company.vat_number ?? company.fiscal_code ?? '-'}</TableCell>
+                    <TableCell className="text-right"><Button variant="ghost" size="icon"><MoreVertical size={18} /></Button></TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Ruoli utente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Azienda</TableHead>
-                <TableHead>Ruolo</TableHead>
-                <TableHead>Stato</TableHead>
-                <TableHead>Profilo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {activeMemberships.length === 0 ? (
+        <TabsContent value="utenti" className="mt-6">
+          <div className="bg-white rounded-xl border overflow-hidden">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500">
-                    Nessuna membership disponibile.
+                  <TableHead>Utente</TableHead>
+                  <TableHead>Azienda</TableHead>
+                  <TableHead>Ruolo</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">MR</div>
+                      <div>
+                        <p className="font-medium">Mario Rossi</p>
+                        <p className="text-xs text-slate-500">mario@edilizia.it</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>Edilizia S.p.A.</TableCell>
+                  <TableCell><Badge variant="secondary">Company Admin</Badge></TableCell>
+                  <TableCell><Badge className="bg-emerald-500">Attivo</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon"><MoreVertical size={18} /></Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                activeMemberships.map((membership) => {
-                  const company = companies.find((item) => item.id === membership.company_id);
-                  return (
-                    <TableRow key={membership.id}>
-                      <TableCell className="font-medium">{company?.name ?? membership.company_id}</TableCell>
-                      <TableCell>{roleLabel(membership.role)}</TableCell>
-                      <TableCell>
-                        <Badge variant={membership.is_active ? 'default' : 'secondary'}>
-                          {membership.is_active ? 'Attivo' : 'Disattivo'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">{membership.profile_id}</TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <Card className="border-amber-200 bg-amber-50">
-        <CardContent className="flex items-start gap-3 p-4 text-sm text-amber-900">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
-            Le modifiche vere a utenti, ruoli e abbonamenti verranno abilitate nello step successivo con funzioni RPC dedicate,
-            così evitiamo escalation di privilegi dal frontend.
+              </TableBody>
+            </Table>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="ruoli" className="mt-6">
+          <div className="bg-white rounded-xl border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ruolo</TableHead>
+                  <TableHead>Descrizione</TableHead>
+                  <TableHead>Utenti Assegnati</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {MOCK_ROLES.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-bold text-blue-600">{r.name}</TableCell>
+                    <TableCell className="max-w-md text-sm text-slate-500">{r.description}</TableCell>
+                    <TableCell className="font-medium">{r.users}</TableCell>
+                    <TableCell className="text-right"><Button variant="ghost" size="icon"><Shield size={18} /></Button></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default Admin;

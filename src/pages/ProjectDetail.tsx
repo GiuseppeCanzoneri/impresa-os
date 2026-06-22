@@ -2,9 +2,6 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  Calendar, 
-  User, 
-  Building2, 
   Euro, 
   Clock, 
   FileText, 
@@ -14,7 +11,6 @@ import {
   TrendingUp,
   AlertTriangle,
   FileStack,
-  Users,
   Receipt,
   Truck,
   Activity,
@@ -27,13 +23,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 
 const ProjectDetail = () => {
   const { id } = useParams();
 
   return (
-    <div className="p-8 space-y-8 ml-64">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

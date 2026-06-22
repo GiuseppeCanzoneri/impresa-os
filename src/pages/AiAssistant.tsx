@@ -78,12 +78,12 @@ export default function AiAssistant() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col bg-slate-50 lg:ml-64">
+    <div className="flex h-[calc(100vh-4rem)] flex-col bg-slate-50">
       <div className="border-b bg-white px-4 py-4 lg:px-8">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="text-blue-600" size={22} />
+              <Bot className="text-blue-600" size={22} />
               <h1 className="text-xl font-bold text-slate-900">Assistente AI Impresa</h1>
             </div>
             <p className="mt-1 text-sm text-slate-500">Chat centrale per interrogare dati aziendali e cantieri.</p>

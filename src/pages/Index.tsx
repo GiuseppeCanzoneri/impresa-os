@@ -59,7 +59,7 @@ const StatCard = ({ title, value, subValue, icon: Icon, trend, trendValue }: any
 
 const Dashboard = () => {
   return (
-    <div className="p-8 space-y-8 ml-64">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Dashboard Direzionale</h1>
         <p className="text-slate-500">Benvenuto in ImpresaOS. Ecco la panoramica della tua azienda.</p>

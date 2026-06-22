@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Lock, Globe, CreditCard, User, MessageSquare, Bot, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Lock, Globe, MessageSquare, Bot, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,7 @@ const Settings = () => {
   ];
 
   return (
-    <div className="p-8 space-y-8 ml-64">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Impostazioni</h1>
         <p className="text-slate-500">Configura il tuo profilo e le preferenze aziendali.</p>
