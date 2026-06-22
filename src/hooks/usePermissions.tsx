@@ -13,9 +13,9 @@ type AppRole =
   | 'consulente'
   | string;
 
-const adminRoles = new Set<AppRole>(['super_admin', 'company_admin']);
-const financeRoles = new Set<AppRole>(['super_admin', 'company_admin', 'direzione', 'amministrazione']);
-const managementRoles = new Set<AppRole>(['super_admin', 'company_admin', 'direzione', 'manager']);
+const adminRoles = new Set(['super_admin', 'company_admin']);
+const financeRoles = new Set(['super_admin', 'company_admin', 'direzione', 'amministrazione']);
+const managementRoles = new Set(['super_admin', 'company_admin', 'direzione', 'manager']);
 
 function humanRole(role?: string | null) {
   if (!role) return 'Utente';
@@ -34,15 +34,15 @@ function humanRole(role?: string | null) {
 }
 
 export function usePermissions() {
-  const { memberships, activeCompanyId } = useCompany();
+  const { activeRole, isSystemAdmin } = useCompany();
 
   return useMemo(() => {
-    const activeMembership = memberships.find((membership) => membership.company_id === activeCompanyId);
-    const role = (activeMembership?.role ?? 'company_admin') as AppRole;
+    const role = (isSystemAdmin ? 'super_admin' : activeRole ?? 'utente') as AppRole;
 
     return {
       role,
       roleLabel: humanRole(role),
+      isSystemAdmin,
       canAccessAdmin: adminRoles.has(role),
       canManageCompany: adminRoles.has(role),
       canSeeFinance: financeRoles.has(role),
@@ -50,5 +50,5 @@ export function usePermissions() {
       canUseInbox: role !== 'consulente',
       canUseReports: role !== 'consulente',
     };
-  }, [memberships, activeCompanyId]);
+  }, [activeRole, isSystemAdmin]);
 }
