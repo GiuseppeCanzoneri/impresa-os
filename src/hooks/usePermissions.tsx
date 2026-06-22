@@ -18,8 +18,6 @@ const financeRoles = new Set(['super_admin', 'company_admin', 'direzione', 'ammi
 const managementRoles = new Set(['super_admin', 'company_admin', 'direzione', 'manager']);
 
 function humanRole(role?: string | null) {
-  if (!role) return 'Utente';
-
   const labels: Record<string, string> = {
     super_admin: 'Super Admin',
     company_admin: 'Admin azienda',
@@ -32,18 +30,15 @@ function humanRole(role?: string | null) {
     consulente: 'Consulente',
   };
 
-  return labels[role] ?? role;
+  return labels[role ?? ''] ?? 'Consulente';
 }
 
 export function usePermissions() {
-  const { memberships, activeCompanyId } = useCompany();
+  const { memberships, activeCompanyId, isDemoFallback } = useCompany();
 
   return useMemo(() => {
     const activeMembership = memberships.find((membership) => membership.company_id === activeCompanyId);
-
-    // Fallback prudente: se il ruolo non è disponibile, l'interfaccia assume il privilegio minimo.
-    // La sicurezza reale resta comunque nelle RLS di Supabase.
-    const role = (activeMembership?.role ?? 'consulente') as AppRole;
+    const role = (activeMembership?.role ?? (isDemoFallback ? 'super_admin' : 'consulente')) as AppRole;
 
     return {
       role,
@@ -55,5 +50,5 @@ export function usePermissions() {
       canUseInbox: role !== 'consulente',
       canUseReports: role !== 'consulente',
     };
-  }, [memberships, activeCompanyId]);
+  }, [memberships, activeCompanyId, isDemoFallback]);
 }
